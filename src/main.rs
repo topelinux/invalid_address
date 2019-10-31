@@ -1,5 +1,6 @@
 extern crate serde;
 extern crate bigdecimal;
+extern crate bitcoin;
 
 use std::error::Error;
 use std::io;
@@ -8,8 +9,9 @@ use std::process;
 use serde::Deserialize;
 use bigdecimal::{BigDecimal, Zero};
 use std::str::FromStr;
-use std::convert::From;
+use std::convert::{From, AsRef};
 use std::collections::HashMap;
+use bitcoin::util::address::Address;
 
 #[derive(Debug, Deserialize)]
 struct Record {
@@ -43,18 +45,21 @@ fn address_parse() -> Result<(), Box<dyn Error>> {
     let mut new_amount: BigDecimal = From::from(0);
     for (addr, value) in &accounts {
         new_amount += value;
-        println!("addr {} value {}", addr, value.to_string());
+        println!("addr {} valid {} value {} ", addr, is_valid_address(addr), value.to_string());
     }
     println!("amount is {}", amount.to_string());
     println!("new_amount is {}", new_amount.to_string());
     Ok(())
 }
 
+fn is_valid_address<T: AsRef<str>>(s: T) -> bool {
+    Address::from_str(s.as_ref()).is_ok()
+}
+
 fn main() {
 
-    let test: BigDecimal = From::from(2.3);
-
-    println!("test is {}", test.to_string());
+    let is_valid = is_valid_address("1Q3umYa43hr4n8BNEUZxRwHBuZeEAP7Db");
+    println!("test add is {:?}", is_valid);
     if let Err(err) = address_parse() {
         println!("error running example: {}", err);
         process::exit(1);
