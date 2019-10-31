@@ -33,12 +33,14 @@ fn address_parse() -> Result<(), Box<dyn Error>> {
         // Notice that we need to provide a type hint for automatic
         // deserialization.
         let record: Record = result?;
-        if let Some(addr) = record.new_addr {
-            //println!("{:?}", new_addr);
-            let curr = accounts.entry(addr).or_insert(From::from(0));
-            let value = BigDecimal::from_str(&record.amount).unwrap();
-            *curr += value.clone();
-            amount += value;
+        if let Some(ref addr) = record.new_addr {
+            let curr = accounts.entry(addr.to_string()).or_insert(From::from(0));
+            if let Ok(value) = BigDecimal::from_str(&record.amount) {
+                *curr += value.clone();
+                amount += value;
+            } else {
+                println!("Invalid item {:?}", record);
+            }
         }
     }
 
