@@ -47,21 +47,26 @@ fn address_parse() -> Result<(), Box<dyn Error>> {
     let mut new_amount: BigDecimal = From::from(0);
     for (addr, value) in &accounts {
         new_amount += value;
-        println!("addr {} valid {} value {} ", addr, is_valid_address(addr), value.to_string());
+        if !is_valid_address(addr) {
+           println!("invalid addr {} value {} ", addr, value.to_string());
+        }
     }
     println!("amount is {}", amount.to_string());
-    println!("new_amount is {}", new_amount.to_string());
+//    println!("new_amount is {}", new_amount.to_string());
     Ok(())
 }
 
 fn is_valid_address<T: AsRef<str>>(s: T) -> bool {
-    Address::from_str(s.as_ref()).is_ok()
+    match Address::from_str(s.as_ref().trim()) {
+        Ok(_) => true,
+        Err(err) => {
+            println!("err is {}", err);
+            false
+        }
+    }
 }
 
 fn main() {
-
-    let is_valid = is_valid_address("1Q3umYa43hr4n8BNEUZxRwHBuZeEAP7Db");
-    println!("test add is {:?}", is_valid);
     if let Err(err) = address_parse() {
         println!("error running example: {}", err);
         process::exit(1);
